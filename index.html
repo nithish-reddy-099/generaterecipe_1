@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Responsive Recipe App</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background-color: #f7f7f7;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    #generate-btn {
+      display: block;
+      margin: 0 auto 30px;
+      padding: 12px 24px;
+      background-color: #30bd09;
+      color: white;
+      font-size: 1rem;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    #generate-btn:hover {
+      background-color: #6cec35;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .card {
+      display: flex;
+      flex-direction: row;
+      background-color: #fff;
+      border-radius: 12px;
+      
+      overflow: hidden;
+      transition: transform 0.3s ease;
+      max-width: 800px;
+      width: 100%;
+      margin-bottom: 20px;
+    }
+
+
+    .card img {
+      width: 250px;
+      object-fit: cover;
+      height: auto;
+    }
+
+    .card-content {
+      padding: 15px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      flex: 1;
+    }
+
+    .card-title {
+      font-size: 1.5rem;
+      font-weight: bold;
+      margin-bottom: 8px;
+      color: #333;
+    }
+
+    .card-subtitle {
+      font-size: 1rem;
+      margin-bottom: 10px;
+      color: #555;
+    }
+
+    .ingredients,
+    .instructions,
+    .more-info {
+      font-size: 0.9rem;
+      color: #444;
+      margin-bottom: 10px;
+    }
+
+    .rating {
+      margin-top: auto;
+      color: #ffa534;
+      font-weight: bold;
+    }
+
+    .label {
+      font-weight: bold;
+      color: #222;
+    }
+
+    .more-info-btn {
+      padding: 8px 16px;
+      background-color: #009688;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      margin-top: 10px;
+      transition: background-color 0.3s ease;
+    }
+
+    .more-info-btn:hover {
+      background-color: #00796b;
+    }
+
+    .more-info {
+      display: none;
+    }
+
+    /* ✅ Responsive for small screens */
+    @media (max-width: 768px) {
+      .card {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+      }
+
+      .card img {
+        width: 100%;
+        height: auto;
+      }
+
+      .card-content {
+        padding: 20px;
+        align-items: center;
+      }
+
+      .card-title,
+      .card-subtitle,
+      .ingredients,
+      .instructions,
+      .more-info {
+        text-align: left;
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🍽️ Delicious Recipe Generator</h1>
+  <button id="generate-btn">Generate Recipe</button>
+  <div class="container" id="recipe-container"></div>
+
+  <script>
+    const container = document.getElementById('recipe-container');
+    const button = document.getElementById('generate-btn');
+
+    async function fetchRandomRecipe() {
+      try {
+        const response = await fetch('https://dummyjson.com/recipes');
+        const data = await response.json();
+        const recipes = data.recipes;
+
+        const randomIndex = Math.floor(Math.random() * recipes.length);
+        const recipe = recipes[randomIndex];
+
+        container.innerHTML = '';
+
+        const card = document.createElement('div');
+        card.className = 'card';
+
+        card.innerHTML = `
+          <img src="${recipe.image}" alt="${recipe.name}">
+          <div class="card-content">
+            <div>
+              <div class="card-title">${recipe.name}</div>
+              <div class="card-subtitle">${recipe.cuisine} | ⏱ ${recipe.prepTimeMinutes} mins</div>
+
+              <div class="ingredients">
+                <span class="label">Ingredients:</span><br>
+                ${recipe.ingredients.slice(0, 5).join(', ')}${recipe.ingredients.length > 5 ? '...' : ''}
+              </div>
+
+              <div class="instructions">
+                <span class="label">Instructions:</span><br>
+                ${recipe.instructions.map((step, i) => `${i + 1}. ${step}`).join('<br>')}
+              </div>
+
+              <button class="more-info-btn">More Info</button>
+              <div class="more-info">
+                <div><span class="label">Calories:</span> ${recipe.caloriesPerServing} kcal</div>
+                <div><span class="label">Cooking Time:</span> ${recipe.prepTimeMinutes} minutes</div>
+              </div>
+            </div>
+            <div class="rating">⭐ ${recipe.rating}</div>
+          </div>
+        `;
+
+        container.appendChild(card);
+
+        const moreInfoBtn = card.querySelector('.more-info-btn');
+        const moreInfoDiv = card.querySelector('.more-info');
+
+        moreInfoBtn.addEventListener('click', () => {
+          const isVisible = moreInfoDiv.style.display === 'block';
+          moreInfoDiv.style.display = isVisible ? 'none' : 'block';
+         
+        });
+
+      } catch (error) {
+        container.innerHTML = `<p>Failed to load recipe. Please try again later.</p>`;
+        console.error('Error fetching recipe:', error);
+      }
+    }
+
+    button.addEventListener('click', fetchRandomRecipe);
+  </script>
+</body>
+</html>
